@@ -7,7 +7,7 @@ classifier=cv2.CascadeClassifier(cv2.data.haarcascades+"haarcascade_frontalface_
 
 def dectect_box(vid):
     grayimg=cv2.cvtColor(vid,cv2.COLOR_BGR2GRAY)
-    faces=classifier.detectMultiScale(grayimg,scaleFactor=1.1,minNeighbors=5,minSize=(40,40))
+    faces=classifier.detectMultiScale(grayimg,scaleFactor=1.1,minNeighbors=15,minSize=(50,50))
     for(x,y,w,h) in faces:
         cv2.rectangle(vid,(x,y),(x+w,y+h),(0,255,0),4)
     return faces
