@@ -1,4 +1,6 @@
 # Installation
+Use Python 3.9 version to avoid face_recognition issues
+
 Create virtual environment
 ```python
 python -m venv venv
