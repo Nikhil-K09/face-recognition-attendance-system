@@ -20,3 +20,5 @@ plt.figure(figsize=(20,10))
 plt.axis('off')
 plt.imshow(img_rgb)
 plt.show()
+
+
