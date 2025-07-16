@@ -3,18 +3,28 @@ Use Python 3.9 version to avoid face_recognition issues
 
 Create virtual environment
 ```python
-python -m venv venv
+python -m venv .venv
 ```
 ```python
-venv\Scripts\activate
+.venv\Scripts\activate
 ```
 ```python
 pip install -r requirements.txt
 ```
-Both image and real-time video detection file
+# Run
+To register new face
 ```python
-py image_detection.py
+py add_face.py
 ```
+Update in database
 ```python
-py video_detection.py
+py encoding.py
+```
+Live-Recognition using webcam
+```python
+py recognition.py
+```
+Webpage preview
+```python
+py app.py
 ```
