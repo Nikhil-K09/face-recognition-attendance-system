@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Face Log Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 40px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="date"] {
+            padding: 8px;
+            font-size: 16px;
+        }
+
+        input[type="submit"] {
+            padding: 8px 16px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            margin: auto;
+            width: 60%;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        caption {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Face Recognition</h1>
+
+    <form method="POST">
+        <label for="date">Select Date:</label>
+        <input type="date" name="date" id="date" value="{{ selected_date }}" required>
+        <input type="submit" value="View">
+    </form>
+
+    {% if logs %}
+        <table>
+            <caption>Logs for {{ selected_date }}</caption>
+            <tr>
+                <th>Name</th>
+                <th>Time</th>
+            </tr>
+            {% for name, time in logs %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>{{ time }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% elif selected_date %}
+        <p style="text-align:center;">No logs found for {{ selected_date }}</p>
+    {% endif %}
+</body>
+</html>

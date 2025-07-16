@@ -42,7 +42,7 @@ log_conn.commit()
 
 def log_attendance(name):
     today = datetime.now().strftime("%Y-%m-%d")
-    time_now = datetime.now().strftime("%H:%M:%S")
+    time_now = datetime.now().strftime("%H:%M")
 
     
     log_cursor.execute("SELECT * FROM logs WHERE name = ? AND date = ?", (name, today))
