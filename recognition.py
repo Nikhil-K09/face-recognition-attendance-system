@@ -2,12 +2,17 @@ import cv2
 import face_recognition
 import numpy as np
 import sqlite3
+import os
+from datetime import datetime
 
-db_path = 'database/face_encodings.db'
 
-conn = sqlite3.connect(db_path)
+encoding_db_path = 'database/face_encodings.db'
+log_db_path = 'database/logs.db'
+os.makedirs('database', exist_ok=True)
+
+
+conn = sqlite3.connect(encoding_db_path)
 cursor = conn.cursor()
-
 cursor.execute("SELECT name, encoding FROM faces")
 rows = cursor.fetchall()
 conn.close()
@@ -19,6 +24,34 @@ for name, enc_bytes in rows:
     enc_np = np.frombuffer(enc_bytes, dtype=np.float64)
     known_encodings.append(enc_np)
     known_names.append(name)
+
+
+log_conn = sqlite3.connect(log_db_path)
+log_cursor = log_conn.cursor()
+
+log_cursor.execute('''
+    CREATE TABLE IF NOT EXISTS logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        date TEXT,
+        time TEXT
+    )
+''')
+log_conn.commit()
+
+
+def log_attendance(name):
+    today = datetime.now().strftime("%Y-%m-%d")
+    time_now = datetime.now().strftime("%H:%M:%S")
+
+    
+    log_cursor.execute("SELECT * FROM logs WHERE name = ? AND date = ?", (name, today))
+    if log_cursor.fetchone() is None:
+        log_cursor.execute("INSERT INTO logs (name, date, time) VALUES (?, ?, ?)", (name, today, time_now))
+        log_conn.commit()
+        print(f"[LOGGED] {name} at {time_now} on {today}")
+    else:
+        print(f"[SKIPPED] Already logged {name} for today")
 
 
 scale = 0.25
@@ -43,6 +76,7 @@ while True:
         if min_distance is not None and min_distance < 0.6:
             match_index = np.argmin(distances)
             name = known_names[match_index].upper()
+            log_attendance(name)
         else:
             name = 'Unknown'
 
@@ -59,4 +93,5 @@ while True:
         break
 
 cap.release()
+log_conn.close()
 cv2.destroyAllWindows()
