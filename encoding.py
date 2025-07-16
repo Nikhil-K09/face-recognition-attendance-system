@@ -2,68 +2,49 @@ import cv2
 import os
 import face_recognition
 import numpy as np
+import sqlite3
 
+os.makedirs('database', exist_ok=True)
+db_path = 'database/face_encodings.db'
 path = 'faces'
 
-images=[]
-classNames=[]
+images = []
+classNames = []
 
-for img in os.listdir(path):
-    image=cv2.imread(f'{path}/{img}')
-    images.append(image)
-    classNames.append(os.path.splitext(img)[0])
-# print(classNames)
+for img_name in os.listdir(path):
+    img = cv2.imread(os.path.join(path, img_name))
+    if img is None:
+        continue
+    images.append(img)
+    classNames.append(os.path.splitext(img_name)[0])
 
-def findecoding(images):
-    encodeList=[]
+def find_encodings(images):
+    encode_list = []
     for img in images:
-        img=cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-        enc=face_recognition.face_encodings(img)[0]
-        encodeList.append(enc)
-        # print(enc)
-    return encodeList
-
-knownEncodings=findecoding(images)
-
-#print("encoding done")
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        encodings = face_recognition.face_encodings(img_rgb)
+        if encodings:  
+            encode_list.append(encodings[0])
+    return encode_list
 
 
-scale=0.25
-box_multiplier=1/scale
-
-cap=cv2.VideoCapture(0)
-
-while True:
-    success, img = cap.read()
-
-    Current_image = cv2.resize(img,(0,0),None,scale,scale)
-    Current_image = cv2.cvtColor(Current_image, cv2.COLOR_BGR2RGB)
-
-    face_locations = face_recognition.face_locations(Current_image, model='hog')
-    face_encodes = face_recognition.face_encodings(Current_image, face_locations)
+conn = sqlite3.connect(db_path)
+cursor = conn.cursor()
 
 
-    for encodeFace, faceLocation in zip(face_encodes, face_locations):
-        matches=face_recognition.compare_faces(knownEncodings, encodeFace, tolerance=0.6)
-        faceDis=face_recognition.face_distance(knownEncodings, encodeFace)
-        matchIndex=np.argmin(faceDis)
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS faces (
+        name TEXT PRIMARY KEY,
+        encoding BLOB
+    )
+''')
 
-        if matches[matchIndex]:
-            name = classNames[matchIndex].upper()
-        else:
-            name = 'Unknown'
+known_encodings = find_encodings(images)
 
-        y1,x2,y2,x1=faceLocation
-        y1,x2,y2,x1=int(y1*box_multiplier),int(x2*box_multiplier),int(y2*box_multiplier),int(x1*box_multiplier)
+for name, encoding in zip(classNames, known_encodings):
+    encoding_bytes = encoding.tobytes()
+    cursor.execute("REPLACE INTO faces (name, encoding) VALUES (?, ?)", (name, encoding_bytes))
 
-        cv2.rectangle(img,(x1,y1),(x2,y2),(0,255,0),2)
-        cv2.rectangle(img,(x1,y2-20),(x2,y2),(255,255,255),cv2.FILLED)
-        cv2.putText(img,name,(x1+6,y2-6),cv2.FONT_HERSHEY_COMPLEX,0.5,(0,0,0),2)
-
-    cv2.imshow("Capturing", img)
-
-    if cv2.waitKey(1) == ord('q'):
-        break
-
-cap.release()
-cv2.destroyAllWindows()
+conn.commit()
+conn.close()
+print("[INFO] Encodings stored in face_encodings.db")
