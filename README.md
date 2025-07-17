@@ -28,3 +28,7 @@ Webpage preview
 ```python
 py app.py
 ```
+Use GUI
+```python
+py main.py
+```
