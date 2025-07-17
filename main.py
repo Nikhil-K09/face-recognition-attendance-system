@@ -7,16 +7,17 @@ import os
 
 LOCALHOST_URL = "http://127.0.0.1:5000"
 
+VENV_PYTHON_PATH = r"D:/Workspace/Develop/Projects/face-recognition/.venv/Scripts/python.exe"
 def run_script(script_name):
     try:
-        subprocess.Popen(['D:/Workspace/Develop/Projects/face-recognition/.venv/Scripts/python.exe', script_name])
+        subprocess.Popen([VENV_PYTHON_PATH, script_name])
     except Exception as e:
         messagebox.showerror("Error", f"Failed to run {script_name}\n{str(e)}")
 
 def open_app():
     def launch_app():
         try:
-            subprocess.Popen(['D:/Workspace/Develop/Projects/face-recognition/.venv/Scripts/python.exe', 'app.py'])
+            subprocess.Popen([VENV_PYTHON_PATH, 'app.py'])
             threading.Timer(2.0, lambda: webbrowser.open(LOCALHOST_URL)).start()
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch web app\n{str(e)}")
